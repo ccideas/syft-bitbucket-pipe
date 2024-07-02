@@ -1,0 +1,1 @@
+SYFT_CMD_ARGS=samples/java --output syft-table

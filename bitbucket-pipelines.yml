@@ -1,0 +1,133 @@
+definitions:
+  steps:
+    - step: &build-docker-image
+        name: 'Build Docker Image'
+        size: 2x
+        script:
+          - IMAGE_NAME=syft-bitbucket-pipe
+          - docker build --build-arg ARCH=amd64 --tag "${IMAGE_NAME}:local" .
+          - docker save "${IMAGE_NAME}:local" --output "${IMAGE_NAME}.tar"
+        services:
+          - docker
+        caches:
+          - docker
+        artifacts:
+          - "*.tar"
+    - step: &shell-check
+        name: 'Shell Lint'
+        image: koalaman/shellcheck-alpine:v0.9.0
+        script:
+          - echo "Linting shell scripts"
+          - shellcheck -x *.sh
+    - step: &docker-lint
+        name: 'Docker Lint'
+        image: hadolint/hadolint:v2.12.0-alpine
+        script:
+          - echo "Linting Dockerfile(s)"
+          - hadolint Dockerfile
+    - step: &markdown-lint
+        name: 'Markdown Lint'
+        image: markdownlint/markdownlint:0.13.0
+        script:
+          - echo "Linting Markdown Files"
+          - mdl *.md || echo "Potential mdlint issues found..."
+    - step: &gen-sbom-for-project
+          name: gen sbom
+          image: debian:bookworm-slim
+          services:
+            - docker
+          caches:
+            - docker
+          script:
+            - apt-get update
+            - DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
+            - apt-get install -y curl
+            - curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin v1.8.0
+            - IMAGE_NAME=syft-bitbucket-pipe
+            - docker load --input "${IMAGE_NAME}.tar"
+            - mkdir sbom_output
+            - syft "${IMAGE_NAME}:local" --output cyclonedx-json@1.4 >> sbom_output/${IMAGE_NAME}_cyclonedx-sbom.json
+          artifacts:
+            - sbom_output/*
+    - step: &scan-sbom
+      name: Scan sBOM
+      script:
+        - chmod 777 sbom_output
+        - pipe: docker://ccideas/sbom-utilities-pipe:1.4.0
+          variables:
+            PATH_TO_SBOM: "sbom_output/${BITBUCKET_REPO_SLUG}_cyclonedx-sbom.json"
+            SCAN_SBOM_WITH_BOMBER: 'true'
+            BOMBER_OUTPUT_FORMAT: 'html'
+            BOMBER_DEBUG: 'true'
+            OUTPUT_DIRECTORY: 'build'
+            SCAN_SBOM_WITH_SBOMQS: 'true'
+            SBOMQS_OUTPUT_FORMAT: 'detailed'
+            SCAN_SBOM_WITH_OSV: 'true'
+            OSV_OUTPUT_FORMAT: 'table'
+            SCAN_SBOM_WITH_GRYPE: 'true'
+            GRYPE_ARGS: '--output table --add-cpes-if-none'
+            GRYPE_OUTPUT_FILENAME: 'grype-scan-results.txt'
+      artifacts:
+        - sbom_output/*
+
+pipelines:
+  pull-requests:
+    '**':
+      - parallel:
+          - step: *shell-check
+          - step: *docker-lint
+          - step: *markdown-lint
+          - step: *build-docker-image
+  branches:
+    main:
+      - parallel:
+          - step: *docker-lint
+          - step: *markdown-lint
+          - step: *build-docker-image
+      - step: *gen-sbom-for-project
+      - step: *scan-sbom
+  custom:
+    push to Dockerhub (dev):
+      - step: *build-docker-image
+      - step:
+          name: 'Publish Dev Docker Image'
+          deployment: Development
+          script:
+            - echo ${DOCKERHUB_PASSWORD} | docker login --username "${DOCKERHUB_USERNAME}" --password-stdin
+            - IMAGE_NAME=syft-bitbucket-pipe
+            - docker load --input "${IMAGE_NAME}.tar"
+            - docker tag "${IMAGE_NAME}:local" "${DOCKERHUB_NAMESPACE}/${IMAGE_NAME}:${DEV_VERSION}-${BITBUCKET_BUILD_NUMBER}"
+            - docker push "${DOCKERHUB_NAMESPACE}/${IMAGE_NAME}:${DEV_VERSION}-${BITBUCKET_BUILD_NUMBER}"
+          services:
+            - docker
+    Prod Release:
+      - variables:
+          - name: PRODUCTION_VERSION
+      - step: *build-docker-image
+      - stage:
+          name: OSS Scan
+          steps:
+            - step: *gen-sbom-for-project
+            - step: *scan-sbom
+      - stage:
+          name: Deploy to Prod
+          deployment: Production
+          steps:
+            - step:
+                name: 'Publish Prod Docker Image'
+                script:
+                  - IMAGE_NAME=syft-bitbucket-pipe
+                  - echo ${DOCKERHUB_PASSWORD} | docker login --username "${DOCKERHUB_USERNAME}" --password-stdin
+                  - docker load --input "${IMAGE_NAME}.tar"
+                  - docker tag "${IMAGE_NAME}:local" "${DOCKERHUB_NAMESPACE}/${IMAGE_NAME}:${PRODUCTION_VERSION}"
+                  - docker push "${DOCKERHUB_NAMESPACE}/${IMAGE_NAME}:${PRODUCTION_VERSION}"
+                services:
+                  - docker
+                caches:
+                  - docker
+            - step:
+                name: tag branch
+                image: alpine/git:1.0.26
+                script:
+                  - git tag -a "v${PRODUCTION_VERSION}" -m "release version ${PRODUCTION_VERSION}"
+                  - git push origin "v${PRODUCTION_VERSION}"   
