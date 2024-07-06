@@ -1,1 +1,1 @@
-SYFT_CMD_ARGS=samples/java --output syft-table
+SYFT_CMD_ARGS=samples/ --output cyclonedx-json@1.4

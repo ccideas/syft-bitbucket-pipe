@@ -1,0 +1,12 @@
+name: Bitbucket SBOM Generator
+image: ccideas/syft-bitbucket-pipe:1.0.0
+category: Security
+description: Generates a Software Bill of Materials as part of a Bitbucket Pipeline for various project types
+repository: https://bitbucket.org/ccideas1/syft-pipe/src/main/
+tags:
+  - sbom
+  - oss
+  - cyclonedx
+  - spdx
+  - oss security
+  - oss supply chain
