@@ -33,6 +33,7 @@ definitions:
           - mdl *.md || echo "Potential mdlint issues found..."
     - step: &gen-sbom-for-project
           name: gen sbom
+          size: 2x
           image: debian:bookworm-slim
           services:
             - docker
@@ -51,6 +52,7 @@ definitions:
             - sbom_output/*
     - step: &scan-sbom
           name: Scan sBOM
+          size: 2x
           script:
             - chmod 777 sbom_output
             - pipe: docker://ccideas/sbom-utilities-pipe:1.4.0
