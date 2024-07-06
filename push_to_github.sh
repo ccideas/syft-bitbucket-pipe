@@ -22,7 +22,7 @@ read -r answer
 
 if [[ "${answer}" =~ ^[Yy]$ ]]; then
     echo "Continuing..."
-    export GIT_SSH_COMMAND="ssh -i ${GITHUB_DEPLOY_KEY_CYCLONEDX_NPM_PIPE}"
+    export GIT_SSH_COMMAND="ssh -i ${GITHUB_DEPLOY_KEY_SYFT_BITBUCKET_PIPE}"
     git remote add github "git@github.com:ccideas/syft-bitbucket-pipe.git" || echo "already added remote"
     git push github "${BRANCH_TO_PUSH_TO_GITHUB}"
 else
