@@ -43,11 +43,11 @@ definitions:
             - apt-get update
             - DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
             - apt-get install -y curl
-            - curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin v1.8.0
+            - curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin v1.18.0
             - IMAGE_NAME=syft-bitbucket-pipe
             - docker load --input "${IMAGE_NAME}.tar"
             - mkdir sbom_output
-            - syft "${IMAGE_NAME}:local" --output cyclonedx-json@1.4 >> sbom_output/${IMAGE_NAME}_cyclonedx-sbom.json
+            - syft "${IMAGE_NAME}:local" --output cyclonedx-json@1.6 >> sbom_output/${IMAGE_NAME}_cyclonedx-sbom.json
           artifacts:
             - sbom_output/*
     - step: &scan-sbom

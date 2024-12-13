@@ -1,15 +1,16 @@
-FROM golang:1.22.4-alpine3.20
+FROM golang:1.22-alpine3.20
 
 ARG ARCH
 
-ENV SYFT_VERSION="v1.8.0" \
+ENV SYFT_VERSION="v1.18.0" \
     SYFT_INSTALL_SCRIPT_URL=https://raw.githubusercontent.com/anchore/syft/main/install.sh \
     SYFT_INSTALL_DIR=/usr/local/bin \
-    SYFT_INSTALL_SCRIPT_TEMP=/tmp/install.sh \
-    CURL_VERSION="8.8.0-r0" \
-    BASH_VERSION="5.2.26-r0"
-    
-RUN apk --no-cache add curl="${CURL_VERSION}" bash="${BASH_VERSION}"
+    SYFT_INSTALL_SCRIPT_TEMP=/tmp/install.sh
+
+# hadolint ignore=DL3018
+RUN apk update \
+    && apk upgrade \
+    && apk add --no-cache curl bash
 
 SHELL ["/bin/bash", "-c"]
 
