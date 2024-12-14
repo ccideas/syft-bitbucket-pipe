@@ -32,7 +32,7 @@ pipelines:
         caches:
           - node
         script:
-          - pipe: docker://ccideas/syft-bitbucket-pipe:1.0.0
+          - pipe: docker://ccideas/syft-bitbucket-pipe:1.1.0
             variables:
               SYFT_CMD_ARGS: '. --output spdx-json=spdx-sbom.json'
         artifacts:
