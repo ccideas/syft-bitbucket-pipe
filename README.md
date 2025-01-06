@@ -1,4 +1,14 @@
-# Bitbucket Pipelines Pipe: SBOM Generator
+# SBOM Generator
+
+[![SonarQube Cloud](https://sonarcloud.io/images/project_badges/sonarcloud-highlight.svg)](https://sonarcloud.io/summary/new_code?id=ccideas1_syft-pipe)
+
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=ccideas1_syft-pipe&metric=bugs)](https://sonarcloud.io/summary/new_code?id=ccideas1_syft-pipe)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=ccideas1_syft-pipe&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=ccideas1_syft-pipe)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=ccideas1_syft-pipe&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=ccideas1_syft-pipe)
+
+
+![Build Badge](https://img.shields.io/bitbucket/pipelines/ccideas1/syft-pipe/main)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/shiftleftcyber/syft-bitbucket-pipe)
 
 A lightweight Bitbucket Pipe which generates a Software Bill of Materials
 utilitizing the popular [Syft](https://github.com/anchore/syft?tab=readme-ov-file)

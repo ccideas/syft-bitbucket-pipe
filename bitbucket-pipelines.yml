@@ -1,4 +1,9 @@
+clone:
+  debth: full
+
 definitions:
+  caches:
+    sonar: ~/.sonar/cache
   steps:
     - step: &build-docker-image
         name: 'Build Docker Image'
@@ -71,6 +76,14 @@ definitions:
                 GRYPE_OUTPUT_FILENAME: 'grype-scan-results.txt'
           artifacts:
             - sbom_output/*
+    - step: &sonarcloud
+          name: sonarcloud scan
+          size: 2x
+          image: sonarsource/sonar-scanner-cli:5
+          caches:
+            - sonar
+          script:
+            - sonar-scanner
 
 pipelines:
   pull-requests:
@@ -80,6 +93,7 @@ pipelines:
           - step: *docker-lint
           - step: *markdown-lint
           - step: *build-docker-image
+          - step: *sonarcloud
   branches:
     main:
       - parallel:
@@ -87,6 +101,7 @@ pipelines:
           - step: *docker-lint
           - step: *markdown-lint
           - step: *build-docker-image
+          - step: *sonarcloud
       - step: *gen-sbom-for-project
       - step: *scan-sbom
   custom:
