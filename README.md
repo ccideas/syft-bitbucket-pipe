@@ -1,4 +1,4 @@
-# SBOM Generator
+# ShiftSBOMGen
 
 [![SonarQube Cloud](https://sonarcloud.io/images/project_badges/sonarcloud-highlight.svg)](https://sonarcloud.io/summary/new_code?id=ccideas1_syft-pipe)
 
@@ -10,9 +10,9 @@
 ![Build Badge](https://img.shields.io/bitbucket/pipelines/ccideas1/syft-pipe/main)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/shiftleftcyber/syft-bitbucket-pipe)
 
-A lightweight Bitbucket Pipe which generates a Software Bill of Materials
-utilitizing the popular [Syft](https://github.com/anchore/syft?tab=readme-ov-file)
-CLI tool for a given project or container image.
+ShiftSBOMGen is a pure client-side Bitbucket Pipe that generates a Software Bill of Materials (SBOM). ShiftSBOMGen
+supports both CycloneDX & SPDX Standards and supports a wide range of ecosystems and container types. 
+No subscriptions, server access, or API keys are required to use this Pipe
 
 The official copy this project is hosted on
 [Bitbucket](https://bitbucket.org/ccideas1/syft-pipe/src/main/). In order to reach
@@ -42,7 +42,7 @@ pipelines:
         caches:
           - node
         script:
-          - pipe: docker://ccideas/syft-bitbucket-pipe:1.1.0
+          - pipe: docker://ccideas/syft-bitbucket-pipe:1.2.0
             variables:
               SYFT_CMD_ARGS: '. --output spdx-json=spdx-sbom.json'
         artifacts:
