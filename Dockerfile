@@ -2,7 +2,7 @@ FROM golang:1.22-alpine3.20
 
 ARG ARCH
 
-ENV SYFT_VERSION="v1.18.0" \
+ENV SYFT_VERSION="v1.19.0" \
     SYFT_INSTALL_SCRIPT_URL=https://raw.githubusercontent.com/anchore/syft/main/install.sh \
     SYFT_INSTALL_DIR=/usr/local/bin \
     SYFT_INSTALL_SCRIPT_TEMP=/tmp/install.sh
